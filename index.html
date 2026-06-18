@@ -112,7 +112,35 @@
 
     #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 190; }
 
-    #restart-btn {
+    /* ── Rotate screen overlay ── */
+    #rotate-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 999;
+      background: #000;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1.2rem; text-align: center; padding: 2rem;
+    }
+    #rotate-overlay.show { display: flex; }
+    .rotate-phone {
+      font-size: 4rem;
+      animation: rotatePhone 1.6s ease-in-out infinite;
+      display: inline-block;
+    }
+    @keyframes rotatePhone {
+      0%   { transform: rotate(0deg); }
+      40%  { transform: rotate(90deg); }
+      60%  { transform: rotate(90deg); }
+      100% { transform: rotate(90deg) scale(1.1); }
+    }
+    #rotate-overlay p {
+      color: #fff; font-family: 'Lato', sans-serif;
+      font-size: 1rem; letter-spacing: 0.06em; opacity: 0.85;
+    }
+    #rotate-overlay span {
+      color: var(--blush); font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+    }
       position: relative; z-index: 2; margin-bottom: 1.5rem;
       padding: 0.45rem 1.5rem; background: transparent;
       border: 1.5px solid var(--rose-light); color: var(--rose);
@@ -123,6 +151,12 @@
   </style>
 </head>
 <body>
+
+<div id="rotate-overlay">
+  <div class="rotate-phone">📱</div>
+  <span>Rotate your screen</span>
+  <p>This experience is best in landscape mode 🌹</p>
+</div>
 
 <div class="petal-layer" id="petals"></div>
 
@@ -457,6 +491,21 @@ document.addEventListener('keydown', (e) => {
     if (matched.size === TOTAL_PAIRS * 2) showWin();
   }
 });
+
+/* ═══════════════ ROTATE SCREEN ═══════════════ */
+function checkOrientation() {
+  const overlay = document.getElementById('rotate-overlay');
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 900;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (isMobile && isPortrait) {
+    overlay.classList.add('show');
+  } else {
+    overlay.classList.remove('show');
+  }
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
+checkOrientation();
 
 /* ═══════════════ BOOT ═══════════════ */
 document.getElementById('restart-btn').addEventListener('click', initGame);
