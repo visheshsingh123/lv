@@ -211,7 +211,7 @@ function shuffle(arr) {
 
 function initGame() {
   positions = buildHeartPositions();
-  const imgs = Array.from({ length: TOTAL_PAIRS }, (_, i) => `photos/${i + 1}.avif`);
+  const imgs = Array.from({ length: TOTAL_PAIRS }, (_, i) => `${i + 1}.avif`);
   cardData = shuffle([...imgs, ...imgs]);
   flipped = []; matched = new Set(); lock = false;
   renderBoard();
