@@ -214,26 +214,37 @@ const HEART_GRID = [
   '....X....',
 ];
 
-const CARD_SIZE   = 80;
-const CARD_GAP    = 6;
 const TOTAL_PAIRS = 18;
+const COLS = 9; // widest row in heart grid
+const ROWS = 7;
 
-function buildHeartPositions() {
-  const step = CARD_SIZE + CARD_GAP;
+function getCardSize() {
+  const padding = 32;
+  const maxW = (window.innerWidth  - padding) / COLS;
+  const maxH = (window.innerHeight - 120)     / ROWS; // leave room for header
+  const size = Math.floor(Math.min(maxW, maxH, 80));
+  return Math.max(size, 36); // never smaller than 36px
+}
+
+function getCardGap(cardSize) {
+  return Math.max(2, Math.floor(cardSize * 0.07));
+}
+
+function buildHeartPositions(cardSize, cardGap) {
+  const step = cardSize + cardGap;
   const pts = [];
   HEART_GRID.forEach((row, r) => {
     [...row].forEach((ch, c) => {
       if (ch === 'X') pts.push({ x: c * step, y: r * step });
     });
   });
-  // Shift so leftmost card is at x=0 → auto margin centres correctly
   const minX = Math.min(...pts.map(p => p.x));
   return pts.map(p => ({ x: p.x - minX, y: p.y }));
 }
 
 /* ═══════════════ GAME LOGIC ═══════════════ */
 
-let positions, cardData, flipped, matched, lock;
+let positions, cardData, flipped, matched, lock, CARD_SIZE, CARD_GAP;
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -244,7 +255,9 @@ function shuffle(arr) {
 }
 
 function initGame() {
-  positions = buildHeartPositions();
+  CARD_SIZE = getCardSize();
+  CARD_GAP  = getCardGap(CARD_SIZE);
+  positions = buildHeartPositions(CARD_SIZE, CARD_GAP);
   const imgs = Array.from({ length: TOTAL_PAIRS }, (_, i) => `${i + 1}.avif`);
   cardData = shuffle([...imgs, ...imgs]);
   flipped = []; matched = new Set(); lock = false;
@@ -268,6 +281,8 @@ function renderBoard() {
 
     const card = document.createElement('div');
     card.className = 'card';
+    card.style.width  = CARD_SIZE + 'px';
+    card.style.height = CARD_SIZE + 'px';
     card.dataset.index = idx;
     card.dataset.img = cardData[idx];
 
@@ -501,6 +516,7 @@ function checkOrientation() {
     overlay.classList.add('show');
   } else {
     overlay.classList.remove('show');
+    initGame(); // recalculate card sizes for new dimensions
   }
 }
 window.addEventListener('resize', checkOrientation);
